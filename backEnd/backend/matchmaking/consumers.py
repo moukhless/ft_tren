@@ -1,19 +1,20 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Invitation
-from backend.profile.models import User
+from .models import Invitation, Game
+from profiles.models import User
 from asgiref.sync import sync_to_async
 
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         if self.scope["user"].is_authenticated:
             self.user = self.scope["user"]
-            await self.accept()
+        await self.accept()
+        await self.channel_layer.group_add(f"user_{self.user.id}", self.channel_name)
         else:
             await self.close()
 
     async def disconnect(self, close_code):
-        pass
+        await self.channel_layer.group_discard(f"user_{self.user.id}", self.channel_name)
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -34,8 +35,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                 sender=self.user, receiver=receiver, game=game_name, status="pending"
             )
 
-            # Notify receiver
-            await self.channel_layer.group_add(f"user_{receiver.id}", self.channel_name)
             await self.channel_layer.group_send(
                 f"user_{receiver.id}",
                 {
@@ -58,21 +57,22 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
             # Notify sender if the response is accepted
             if response == "accepted":
-                await self.channel_layer.group_add(f"user_{invitation.sender.id}", self.channel_name)
                 await self.channel_layer.group_send(
                     f"user_{invitation.sender.id}",
                     {
                         "type": "match_found",
-                        "message": f"{invitation.receiver.username} accepted your invite! Game starting...",
+                        "message": "Game starting...",
                         "game_id": invitation.game.id,
                     },
                 )
-
-                # Notify receiver
-                await self.send(json.dumps({"type": "match_found", "message": "Match found! Game starting..."}))
-
-            elif response == "rejected":
-                await self.send(json.dumps({"type": "invite_rejected", "message": "Invite rejected."}))
+                await self.channel_layer.group_send(
+                    f"user_{invitation.receiver.id}",
+                    {
+                        "type": "match_found",
+                        "message": "Game starting...",
+                        "game_id": invitation.game.id,
+                    },
+                )
 
         except Exception as e:
             await self.send(json.dumps({"type": "error", "message": str(e)}))

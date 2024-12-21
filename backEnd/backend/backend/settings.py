@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'profiles',
     'chat',
     'notification',
+    'matchmaking',
 ]
 
 REST_FRAMEWORK = {
