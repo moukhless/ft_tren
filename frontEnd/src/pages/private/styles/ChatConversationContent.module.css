@@ -1,0 +1,61 @@
+div[class*="true"] {
+    margin-top: 1em;
+}
+
+.chatConversationContent div[class*="MessagesOfOwner"],
+div[class*="MessagesOfOther"] {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+}
+
+.chatConversationContent div[class*="MessagesOfOther"] {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+
+    >img {
+        background-color: aqua;
+        border-radius: 32px 0px 0px 32px;
+        margin: 0px;
+        margin-right: 4px;
+        padding: 0px;
+        width: 31px;
+    }
+
+    >div {
+        margin: 0px;
+        padding: 0px;
+        width: 35px;
+    }
+
+    >p {
+        background-color: rgb(217, 191, 255);
+    }
+}
+
+
+.chatConversationContent div[class*="MessagesOfOwner"] {
+    justify-content: right;
+
+    >p {
+        background-color: rgb(100, 176, 90);
+        text-align: right;
+    }
+}
+
+.chatConversationContent p {
+    /* text-align: justify;
+    text-justify: inter-word; */
+    font-size: clamp(0.8em, 0.1em + 1vw, 1.3em);
+    padding-inline: 5px !important;
+    padding-block: 5px;
+    margin-block: 1px;
+    border-radius: 20px;
+    width: fit-content;
+    line-height: 1em;
+    font-weight: 500;
+    /* color:brown; */
+}

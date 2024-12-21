@@ -1,0 +1,10 @@
+- friendlist overflow should be auto
+- clicking outside of Friendlist should close it
+- right Friendlists should not go outside the window (the opening direction should be left instead of right)
+- inviting animation (graying a friend upon inviting them)
+- fix startButton background
+- add startButton timer
+
+- invited friends shouldn't be re-invited (backend related)
+- first 2 winners should be moved to the center PlayerHolders (backend related)
+- tournament winning player should be marked as the winner (backend related)
