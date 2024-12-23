@@ -17,6 +17,3 @@ class Invitation(models.Model):
         max_length=20, choices=[("pending", "Pending"), ("accepted", "Accepted"), ("rejected", "Rejected")]
     )
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Invitation from {self.sender.username} to {self.receiver.username} for {self.game.name} ({self.status})"

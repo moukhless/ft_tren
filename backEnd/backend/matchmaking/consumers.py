@@ -1,100 +1,89 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Invitation, Game
-from profiles.models import User
 from asgiref.sync import sync_to_async
+from .models import Invitation
+from profiles.models import User
 
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        if self.scope["user"].is_authenticated:
-            self.user = self.scope["user"]
-        await self.accept()
-        await self.channel_layer.group_add(f"user_{self.user.id}", self.channel_name)
-        else:
+        if not self.scope["user"].is_authenticated:
             await self.close()
+            return
+            
+        self.user = self.scope["user"]
+        self.user_group = f"user_{self.user.id}"
+        await self.accept()
+        await self.channel_layer.group_add(self.user_group, self.channel_name)
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(f"user_{self.user.id}", self.channel_name)
+        if hasattr(self, 'user_group'):
+            await self.channel_layer.group_discard(self.user_group, self.channel_name)
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-
-        if data["type"] == "send_invite":
-            await self.handle_send_invite(data)
-        elif data["type"] == "respond_invite":
-            await self.handle_respond_invite(data)
+        handlers = {
+            "send_invite": self.handle_send_invite,
+            "respond_invite": self.handle_respond_invite
+        }
+        handler = handlers.get(data["type"])
+        if handler:
+            await handler(data)
 
     async def handle_send_invite(self, data):
-        receiver_id = data["receiver_id"]
-        game_name = data["game_name"]
-
-        # Create an invitation
         try:
-            receiver = await sync_to_async(User.objects.get)(id=receiver_id)
+            receiver = await sync_to_async(User.objects.get)(id=data["receiver_id"])
             invitation = await sync_to_async(Invitation.objects.create)(
-                sender=self.user, receiver=receiver, game=game_name, status="pending"
+                sender=self.user,
+                receiver=receiver,
+                game=data["game_name"],
+                status="pending"
             )
-
+            
             await self.channel_layer.group_send(
                 f"user_{receiver.id}",
                 {
                     "type": "notify_invite",
-                    "message": f"{self.user.username} invited you to play {game_name}.",
+                    "message": f"{self.user.username} invited you to play {data['game_name']}",
                     "invite_id": invitation.id,
-                },
+                }
             )
+        except User.DoesNotExist:
+            await self.send_error("User not found")
         except Exception as e:
-            await self.send(json.dumps({"type": "error", "message": str(e)}))
+            await self.send_error(str(e))
 
     async def handle_respond_invite(self, data):
-        invite_id = data["invite_id"]
-        response = data["response"]  # "accepted" or "rejected"
-
         try:
-            invitation = await sync_to_async(Invitation.objects.get)(id=invite_id)
-            invitation.status = response
+            invitation = await sync_to_async(Invitation.objects.get)(id=data["invite_id"])
+            invitation.status = data["response"]
             await sync_to_async(invitation.save)()
 
-            # Notify sender if the response is accepted
-            if response == "accepted":
-                await self.channel_layer.group_send(
-                    f"user_{invitation.sender.id}",
-                    {
-                        "type": "match_found",
-                        "message": "Game starting...",
-                        "game_id": invitation.game.id,
-                    },
-                )
-                await self.channel_layer.group_send(
-                    f"user_{invitation.receiver.id}",
-                    {
-                        "type": "match_found",
-                        "message": "Game starting...",
-                        "game_id": invitation.game.id,
-                    },
-                )
-
+            if data["response"] == "accepted":
+                message = {
+                    "type": "match_found",
+                    "message": "Game starting...",
+                    "game_name": invitation.game,
+                }
+                # Notify both players
+                for user_id in [invitation.sender.id, invitation.receiver.id]:
+                    await self.channel_layer.group_send(f"user_{user_id}", message)
+                    
+        except Invitation.DoesNotExist:
+            await self.send_error("Invitation not found")
         except Exception as e:
-            await self.send(json.dumps({"type": "error", "message": str(e)}))
+            await self.send_error(str(e))
 
     async def notify_invite(self, event):
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "type": "invite_received",
-                    "message": event["message"],
-                    "invite_id": event["invite_id"],
-                }
-            )
-        )
+        await self.send(text_data=json.dumps({
+            "type": "invite_received",
+            **event
+        }))
 
     async def match_found(self, event):
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "type": "match_found",
-                    "message": event["message"],
-                    "game_id": event["game_id"],
-                }
-            )
-        )
+        await self.send(text_data=json.dumps(event))
+
+    async def send_error(self, message):
+        await self.send(text_data=json.dumps({
+            "type": "error",
+            "message": message
+        }))

@@ -8,6 +8,7 @@ import { game } from "./styles";
 import SearchFriendsInGame from "./components/gameComponents/SearchFriendsInGame";
 
 const Game = () => {
+
   return (
     <>
       <div className={game}>

@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export type UserDataType = {
+  id: ReactNode;
   email?: string;
   first_name?: string;
   last_name?: string;
