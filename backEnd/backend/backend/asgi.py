@@ -13,7 +13,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from chat import routing, middleware
 from channels.security.websocket import AllowedHostsOriginValidator
 from notification import routing as notification_routing
-from matchmaking import routing as websocket_routing
+from matchmaking import routing as matchmaking_routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
@@ -23,6 +23,8 @@ application = ProtocolTypeRouter({
             URLRouter(
                 routing.websocket_urlpatterns
                 + notification_routing.websocket_urlpatterns
+                + matchmaking_routing.ws_urlpatterns
+
         )
     )
     ),

@@ -16,13 +16,14 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     liblcms2-dev 
     
-COPY requirements.txt .
-
+    
 RUN pip install --upgrade pip
-
+    
+COPY requirements.txt .
+    
 RUN pip install -r requirements.txt
 
-COPY  . .
+# COPY  . .
 
 EXPOSE 8000
 

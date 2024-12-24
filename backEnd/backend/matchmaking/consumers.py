@@ -7,11 +7,12 @@ from profiles.models import User
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         if not self.scope["user"].is_authenticated:
+
             await self.close()
             return
-            
         self.user = self.scope["user"]
         self.user_group = f"user_{self.user.id}"
+        print("user_group: ", f"user_{self.user.id}")
         await self.accept()
         await self.channel_layer.group_add(self.user_group, self.channel_name)
 
@@ -21,6 +22,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
+        print("data: ", data)
         handlers = {
             "send_invite": self.handle_send_invite,
             "respond_invite": self.handle_respond_invite
@@ -44,6 +46,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                 {
                     "type": "notify_invite",
                     "message": f"{self.user.username} invited you to play {data['game_name']}",
+                    "game_name": data["game_name"],
                     "invite_id": invitation.id,
                 }
             )
@@ -54,6 +57,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
     async def handle_respond_invite(self, data):
         try:
+
             invitation = await sync_to_async(Invitation.objects.get)(id=data["invite_id"])
             invitation.status = data["response"]
             await sync_to_async(invitation.save)()
@@ -64,20 +68,26 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
                     "message": "Game starting...",
                     "game_name": invitation.game,
                 }
+
                 # Notify both players
-                for user_id in [invitation.sender.id, invitation.receiver.id]:
+                get_sender_id = sync_to_async(lambda: invitation.sender.id)
+                get_receiver_id = sync_to_async(lambda: invitation.receiver.id)
+                
+                sender_id = await get_sender_id()
+                receiver_id = await get_receiver_id()
+                
+                # Notify both players
+                for user_id in [sender_id, receiver_id]:
                     await self.channel_layer.group_send(f"user_{user_id}", message)
                     
         except Invitation.DoesNotExist:
             await self.send_error("Invitation not found")
         except Exception as e:
+            print("e:", e)
             await self.send_error(str(e))
 
     async def notify_invite(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "invite_received",
-            **event
-        }))
+        await self.send(text_data=json.dumps(event))
 
     async def match_found(self, event):
         await self.send(text_data=json.dumps(event))
