@@ -2,8 +2,9 @@ import { pongPlayer } from "@/media-exporting";
 import { pongPlayerInGame } from "../../styles";
 import { useSelector } from "react-redux";
 import { RootState } from "@/src/states/store";
-
+import Game2 from "../../game2";
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 const PongPlayerInGame = () => {
   const {username} = useSelector((state:RootState) => state.user.value)
@@ -35,6 +36,7 @@ const PongPlayerInGame = () => {
           break;
         case 'match_found':
           console.log('Match found:', data.message);
+
           break;
         case 'error':
           console.error('Matchmaking error:', data.message);
@@ -100,7 +102,7 @@ const PongPlayerInGame = () => {
               <span className="">HI {!username? "user":  username}!</span>
               ENJOY YOUR TIME
             </div>
-            <button className="play-button" onClick={handlePlayButtonClick}>PLAY NOW</button>
+              <button className="play-button" >PLAY NOW</button>
           </div>
           <div className="pong-player-vector">
             <img src={pongPlayer} alt="pong player" className="" />

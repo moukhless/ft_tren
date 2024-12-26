@@ -28,6 +28,7 @@ import Contact from "@publicPages/Contact";
 import Profile from "@privatePages/Profile";
 import Chat from "@privatePages/Chat";
 import Game from "@privatePages/Game";
+import Game2 from "@privatePages/game2";
 import Recent from "@privatePages/Recent";
 import Friends from "@privatePages/Friends";
 import SettingProfile from "../pages/private/SettingProfile";
@@ -55,6 +56,7 @@ const routingTree: RouteObject[] = createRoutesFromElements(
     <Route element={<PrivateRoutes />}>
       <Route element={<DashboardLayout />}>
         <Route path="game" element={<Game />} />
+        <Route path="game2" element={<Game2 />} />
         <Route path="profile">
           <Route element={<ProfileLayout />}>
             <Route index element={<Navigate to="details" replace />} />

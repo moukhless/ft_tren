@@ -63,6 +63,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             await sync_to_async(invitation.save)()
 
             if data["response"] == "accepted":
+                
                 message = {
                     "type": "match_found",
                     "message": "Game starting...",
@@ -83,7 +84,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         except Invitation.DoesNotExist:
             await self.send_error("Invitation not found")
         except Exception as e:
-            print("e:", e)
             await self.send_error(str(e))
 
     async def notify_invite(self, event):
