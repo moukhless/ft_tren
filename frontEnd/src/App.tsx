@@ -2,7 +2,7 @@ import MainRoutingComponent from "@router/MainRoutingComponent.tsx";
 import { RootState } from "./states/store";
 import { useEffect } from "react";
 import UseAxiosPrivate from "./services/hooks/UseAxiosPrivate";
-import setAuthenticatedData, {
+import {
   setBlockedData,
   setFriendsData,
   setUserData,
@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 import { useSelector } from "react-redux";
 import { UserDataType } from "./states/authentication/userSlice";
 import { BlockerUsersType } from "./states/authentication/blockedSlice";
+import refreshToken from "./services/hooks/refreshToken";
 
 const getUsersInfo = async (axiosPrivateHook: AxiosInstance) => {
   await axiosPrivateHook
@@ -61,7 +62,8 @@ function App() {
   useEffect(() => {
     if (!isAuthenticated) {
       if (Cookies.get("accessToken") !== undefined) {
-        setAuthenticatedData(Cookies.get("accessToken")!);
+        const refresh = refreshToken();
+        refresh();
       }
     } else {
       getUsersInfo(axiosPrivateHook);

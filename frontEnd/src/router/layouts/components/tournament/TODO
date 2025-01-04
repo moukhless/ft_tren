@@ -1,8 +1,5 @@
-- friendlist overflow should be auto
-- clicking outside of Friendlist should close it
-- right Friendlists should not go outside the window (the opening direction should be left instead of right)
+- right Friendlists should not go outside the window (the opening direction should be left instead of right) (need to be in school to do this one)
 - inviting animation (graying a friend upon inviting them)
-- fix startButton background
 - add startButton timer
 
 - invited friends shouldn't be re-invited (backend related)

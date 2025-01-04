@@ -10,6 +10,9 @@ import ProfileStatsStyles from "@router/styles/componentsStyles/ProfileStatsStyl
 import ProfileWaletStatsStyles from "@router/styles/componentsStyles/ProfileWaletStatsStyles.module.css";
 import NotFoundLayoutStyles from "@router/styles/NotFoundLayout.module.css";
 import TournamentLayoutStyles from "@router/styles/TournamentLayout.module.css";
+import PingPongLayoutStyles from "@router/styles/PingPongLayout.module.css";
+import RootLayoutStyles from "@router/styles/RootLayout.module.css";
+import NotificationsComponentStyles from "@router/styles/componentsStyles/notificationsStyles/NotificationsComponent.module.css";
 
 export const homeLayout = homeLayoutStyles["homeLayout"];
 
@@ -46,3 +49,16 @@ export const notFoundLayout = NotFoundLayoutStyles["notFoundLayout"];
 /**tournament layout styles */
 
 export const tournamentLayout = TournamentLayoutStyles["tournamentLayout"];
+
+/**pingpong layout styles */
+
+export const pingPongLayout = PingPongLayoutStyles["pingPongLayout"];
+
+/**root layout styles */
+
+export const rootLayout = RootLayoutStyles["rootLayout"];
+
+/** components of notifications styling */
+
+export const notificationsComponent =
+  NotificationsComponentStyles["notificationsComponent"];

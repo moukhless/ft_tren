@@ -9,25 +9,25 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import UseAxiosPrivate from "@/src/services/hooks/UseAxiosPrivate";
 import { ReactNode, useEffect } from "react";
 import { setUserData } from "../modules/setAuthenticationData";
+import { toast } from "react-toastify";
 
 const updateUserSchema = z.object({
   first_name: z
     .string()
     .max(50, { message: "max length of first name is 50 chars" })
-    .min(3, { message: "min length of first name is 3 chars" })
+    // .min(3, { message: "min length of first name is 3 chars" })
     .optional(),
   last_name: z
     .string()
     .max(50, { message: "max length of last name is 50 chars" })
-    .min(3, { message: "min length of last name is 3 chars" })
+    // .min(3, { message: "min length of last name is 3 chars" })
     .optional(),
   avatar: z
     .any()
     .optional()
-    // .refine((file) => console.log(file[0]))
     .refine(
       (file) => {
-        return !file[0] || file[0]?.size <= 2000000;
+        return !file || !file[0] || file[0]?.size <= 2000000;
       },
       { message: `Max image size is 2MB.` }
     )
@@ -61,30 +61,46 @@ const SettingProfile = () => {
       reset({
         first_name: userData.first_name,
         last_name: userData.last_name,
-        avatar: userData.avatar,
+        avatar: undefined,
       });
     }
   }, [userData]);
-  const onSubmit: SubmitHandler<UpdateUserSchemaType> = async (
+  const updateProfileData: SubmitHandler<UpdateUserSchemaType> = async (
     data: UpdateUserSchemaType
   ) => {
     try {
-      // console.log(data.avatar);
-      // console.log(data.avatar[0]);
-      if (!data.avatar[0]) delete data.avatar;
+      if (data.first_name === userData.first_name) delete data.first_name;
+      if (data.last_name === userData.last_name) delete data.last_name;
+      if (!data.avatar[0] || !data.avatar) delete data.avatar;
       else {
         data = { ...data, avatar: data.avatar[0] };
       }
       console.log(data);
-      const res = await axiosPrivateHook.put("user_info", data);
-      console.log(res);
+      if (Object.keys(data).length === 0) return;
+      const res = await axiosPrivateHook.put("update_user", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (data.avatar) {
+        data = {
+          ...data,
+          avatar: data.avatar ? res.data.message : userData.avatar,
+        };
+      }
       setUserData({
         ...userData,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        avatar: data.avatar ? data.avatar[0].name : userData.avatar,
+        ...data,
+      });
+      toast.success("profile data Updated successfully", {
+        autoClose: 1000,
+        toastId: userData?.username! + userData?.created_at,
       });
     } catch (err) {
+      toast.error("Error in update profile data", {
+        autoClose: 2000,
+        toastId: userData?.username! + userData?.created_at,
+      });
       console.log("error in update the user data at setting profile");
       console.log(err);
     }
@@ -92,7 +108,10 @@ const SettingProfile = () => {
 
   return (
     <div className={settingProfile}>
-      <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+      <form
+        onSubmit={handleSubmit(updateProfileData)}
+        encType="multipart/form-data"
+      >
         <div className="first-last-name">
           <div className="first-name">
             <label htmlFor="firstName">First name</label>

@@ -15,6 +15,7 @@ import ConversationContent from "./ChatConversationContent.module.css";
 import ProfileStyles from "./Profile.module.css";
 import RecentStyles from "./Recent.module.css";
 import FriendsStyles from "./Friends.module.css";
+import FriendRequestsStyles from "./FriendRequests.module.css";
 import SettingProfileStyles from "./SettingProfile.module.css";
 import SettingPasswordStyles from "./SettingPassword.module.css";
 import SettingTwoFactorAuthentificationStyles from "./SettingTwoFactorAuthentification.module.css";
@@ -60,6 +61,7 @@ export const chatConversationContent =
 export const profile = ProfileStyles["profile"];
 export const recent = RecentStyles["recent"];
 export const friends = FriendsStyles["friends"];
+export const friendRequests = FriendRequestsStyles["friendRequests"];
 
 /**
  * the styles of setting components

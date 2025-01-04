@@ -58,7 +58,7 @@ const ProfileLayout = () => {
     } else {
       setData(currentUserData);
     }
-  }, [userName,currentUserData]);
+  }, [userName, currentUserData]);
 
   return (
     <Fragment>
@@ -97,25 +97,29 @@ const ProfileLayout = () => {
             >
               Profile
             </NavLink>
-            {(!userName || userName === store.getState().user.value.username) && (
-              <NavLink className="" to="friends">
-                Friends
-              </NavLink>
+            {(!userName ||
+              userName === store.getState().user.value.username) && (
+              <>
+                <NavLink className="" to="friends">
+                  Friends
+                </NavLink>
+                <NavLink className="" to="requests">
+                  requests
+                </NavLink>
+              </>
             )}
           </div>
           <div className="user-image-link-content">
             <div className="user-image">
-              <svg className="">
-                <image
-                  width="100%"
-                  height="100%"
-                  href="/assets/images/profileBackgroundCurve.svg"
-                  className="mt-autos"
+              <div className="bg-dangesr">
+                <img
+                  src={
+                    data.avatar
+                      ? process.env.BACKEND_API_URL + "" + data.avatar
+                      : profileIcon
+                  }
+                  alt="user image"
                 />
-              </svg>
-              <div className="">
-                <img src={data.avatar? process.env.BACKEND_API_URL+""+data.avatar : profileIcon} alt="user image" />
-                
               </div>
             </div>
             <div className="link-content">
@@ -124,9 +128,7 @@ const ProfileLayout = () => {
           </div>
         </div>
         <div className="waletStats">
-          <WaletState
-            data={data}
-          />
+          <WaletState data={data} />
         </div>
       </div>
     </Fragment>

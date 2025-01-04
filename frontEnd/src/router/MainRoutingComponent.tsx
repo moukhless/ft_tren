@@ -28,7 +28,6 @@ import Contact from "@publicPages/Contact";
 import Profile from "@privatePages/Profile";
 import Chat from "@privatePages/Chat";
 import Game from "@privatePages/Game";
-import Game2 from "@privatePages/game2";
 import Recent from "@privatePages/Recent";
 import Friends from "@privatePages/Friends";
 import SettingProfile from "../pages/private/SettingProfile";
@@ -38,6 +37,9 @@ import ChatArea from "@privatePages/ChatArea";
 // routers protection
 import PrivateRoutes from "@router/PrivateRoutes";
 import AuthorizationRoutes from "@router/AuthorizationRoutes";
+import FriendRequests from "../pages/private/FriendRequests";
+import PingPongLayout from "./layouts/PingPongLayout";
+import Game2 from "./layouts/Game2";
 
 const routingTree: RouteObject[] = createRoutesFromElements(
   <Route element={<RootLayout />}>
@@ -56,13 +58,13 @@ const routingTree: RouteObject[] = createRoutesFromElements(
     <Route element={<PrivateRoutes />}>
       <Route element={<DashboardLayout />}>
         <Route path="game" element={<Game />} />
-        <Route path="game2" element={<Game2 />} />
         <Route path="profile">
           <Route element={<ProfileLayout />}>
             <Route index element={<Navigate to="details" replace />} />
             <Route path="details" element={<Profile />} />
             <Route path="recent" element={<Recent />} />
             <Route path="friends" element={<Friends />} />
+            <Route path="requests" element={<FriendRequests />} />
             <Route path=":userName">
               <Route index element={<Navigate to="details" replace />} />
               <Route path="details" element={<Profile />} />
@@ -80,6 +82,8 @@ const routingTree: RouteObject[] = createRoutesFromElements(
           <Route path="profile" element={<SettingProfile />} />
           <Route path="password" element={<SettingPassword />} />
         </Route>
+        <Route path="ping-pong" element={<PingPongLayout/>}/>
+        <Route path="game2" element={<Game2 />} />
       </Route>
     </Route>
     <Route path="*" element={<NotFoundLayout />}></Route>

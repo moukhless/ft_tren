@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useState, useRef} from 'react'
 import { tournamentRobot } from '@/media-exporting'
 import { inviteFriend } from '@/media-exporting'
 import Svg from './Svg'
@@ -34,17 +34,26 @@ const Friend = ({index, name, online=false}: FriendProps) => {
 
 const FriendsList = (props) => {
 	const [joined, setJoined] = useState(false)
+	const friendsListRef = useRef(null)
 
 	console.log(props.FriendsData)
 
 	const handleJoin = () => {
 		setJoined(true)
 	}
+
+	const closeFriendsList = (e) => {
+		if(!friendsListRef.current?.contains(e.target))
+			props.setFocusedId(0)
+	}
+
+	 document.addEventListener('mousedown', closeFriendsList)
+
 	let color = "#B87EA5";
 	if (joined)
 		color = "#656565"
 	return (
-		<div className="FriendsList">
+		<div className="FriendsList" ref={friendsListRef}>
 			<button style={{background: `${color}`}} className="JoinButton" onClick={handleJoin}>JOIN</button>
 			{props.FriendsData && props.FriendsData.map((friend : UserDataType , index:number) => (
 				<Friend index={index} name={friend.username+""} online={friend.is_online ? true : false} key={friend.username}/>

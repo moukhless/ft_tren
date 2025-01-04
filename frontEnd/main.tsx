@@ -18,11 +18,11 @@ const rootDOM = document.getElementById("root") as Element;
 const root = createRoot(rootDOM);
 
 root.render(
-  <StrictMode>
+  // <StrictMode>
     <Provider store={store}>
       <PersistLogin>
         <App />
       </PersistLogin>
     </Provider>
-  </StrictMode>
+  // </StrictMode>
 );

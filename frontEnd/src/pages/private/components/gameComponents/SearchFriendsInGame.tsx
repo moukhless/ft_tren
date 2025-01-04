@@ -5,17 +5,18 @@ import { Link } from "react-router-dom";
 import { profileIcon } from "@/media-exporting";
 import { RiUserAddFill } from "react-icons/ri";
 import UseAxiosPrivate from "@/src/services/hooks/UseAxiosPrivate";
-import { AxiosInstance } from "axios";
 import { useSelector } from "react-redux";
 import { RootState, store } from "@/src/states/store";
 import { AllUsersDataType } from "@/src/states/authentication/allUsersSlice";
-import {
-  setAllUsersData,
-  setBlockedData,
-  setFriendsData,
-} from "@/src/pages/modules/setAuthenticationData";
 import { MdPersonRemoveAlt1 } from "react-icons/md";
 import { CgUnblock } from "react-icons/cg";
+import {
+  blockUser,
+  getAllUsersData,
+  removeFriend,
+  sendFriendRequest,
+  unblockUser,
+} from "@/src/pages/modules/fetchingData";
 
 let isInputFocused: boolean = false;
 let isDevFocused: boolean = false;
@@ -30,124 +31,6 @@ const showSearchList = () => {
   let selectSearchList = document.querySelector(".searched-friends-list");
   if (selectSearchList?.classList.contains("d-none"))
     selectSearchList?.classList.remove("d-none");
-};
-
-const sendFriendRequest = (
-  axiosPrivateHook: AxiosInstance,
-  username: string
-) => {
-  axiosPrivateHook
-    .post("friend_req", { username: username })
-    .then((res) => {
-      console.log("friend request sent to " + username);
-      console.log(res);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
-
-const removeFriend = (
-  axiosPrivateHook: AxiosInstance,
-  username: string,
-  users: AllUsersDataType[],
-  setUsers: React.Dispatch<React.SetStateAction<AllUsersDataType[]>>
-) => {
-  axiosPrivateHook
-    .delete("friends", { data: { username: username } })
-    .then((res) => {
-      console.log("remove Friend " + username + " ");
-      console.log(res);
-      setFriendsData(
-        store
-          .getState()
-          .friends.value.filter((friend) => friend.username !== username)
-      );
-      setUsers(
-        users.map((user) => {
-          return user.username === username
-            ? { ...user, is_friend: false }
-            : user;
-        })
-      );
-    })
-    .catch((err) => {
-      console.log(username);
-      console.log(err);
-    });
-};
-
-const removeBlockToUser = (
-  axiosPrivateHook: AxiosInstance,
-  username: string,
-  users: AllUsersDataType[],
-  setUsers: React.Dispatch<React.SetStateAction<AllUsersDataType[]>>
-) => {
-  axiosPrivateHook
-    .delete("block_user", { data: { username: username } })
-    .then((res) => {
-      console.log("removed block to user " + username + " ");
-      console.log(res);
-      setBlockedData(
-        store
-          .getState()
-          .blocked.value.filter((blocked) => blocked.username !== username)
-      );
-      setAllUsersData(
-        store.getState().allUsers.value.map((user) => {
-          return user.username === username
-            ? { ...user, is_blocked: false }
-            : user;
-        })
-      );
-      setUsers(
-        users.map((user) => {
-          return user.username === username
-            ? { ...user, is_blocked: false }
-            : user;
-        })
-      );
-    })
-    .catch((err) => {
-      console.log("error in removing block to a user ");
-      console.log(err);
-    });
-};
-
-const blockUser = (
-  axiosPrivateHook: AxiosInstance,
-  username: string,
-  users: AllUsersDataType[],
-  setUsers: React.Dispatch<React.SetStateAction<AllUsersDataType[]>>
-) => {
-  axiosPrivateHook
-    .post("block_user", { username: username })
-    .then((res) => {
-      console.log("you block user " + username + " ");
-      console.log(res);
-      setBlockedData([
-        ...store.getState().blocked.value,
-        { username: username },
-      ]);
-      setAllUsersData(
-        store.getState().allUsers.value.map((user) => {
-          return user.username === username
-            ? { ...user, is_blocked: true }
-            : user;
-        })
-      );
-      setUsers(
-        users.map((user) => {
-          return user.username === username
-            ? { ...user, is_blocked: true }
-            : user;
-        })
-      );
-    })
-    .catch((err) => {
-      console.log("error in blocking a user ");
-      console.log(err);
-    });
 };
 
 function searchForUser(
@@ -169,36 +52,15 @@ function searchForUser(
   else if (users.length) setUsers([]);
 }
 
-// const getAllFriendRequest = () => {};
-
-// const fetchAllUsers = async (axiosPrivateHook: AxiosInstance) => {
-//   const response = await axiosPrivateHook.post("search_user");
-//   if (response.statusText != "OK") throw new Error("Failed to get Users data");
-//   return response;
-// };
-
 const SearchFriendsInGame = () => {
   const [users, setUsers] = useState<AllUsersDataType[]>([]);
-  const userData = useSelector((state: RootState) => state.user.value);
   const allUsersData = useSelector((state: RootState) => state.allUsers.value);
   const axiosPrivateHook = UseAxiosPrivate();
   useEffect(() => {
     if (!allUsersData || !allUsersData.length) {
-      axiosPrivateHook
-        .post("search_user")
-        .then((response) => {
-          console.log("response in Search Friends in Game");
-          console.log(response);
-          setAllUsersData(response.data.user);
-          console.log(allUsersData);
-        })
-        .catch((err) => {
-          console.log("error in Search Friends in Game");
-          console.log(err);
-          setAllUsersData([]);
-        });
+      getAllUsersData(axiosPrivateHook);
     }
-  }, [allUsersData, userData]);
+  }, [allUsersData]);
 
   return (
     <div className={searchFriendsInGame}>
@@ -264,12 +126,7 @@ const SearchFriendsInGame = () => {
                   <div
                     className="unfriend-button"
                     onClick={() =>
-                      removeFriend(
-                        axiosPrivateHook,
-                        user.username,
-                        users,
-                        setUsers
-                      )
+                      removeFriend(axiosPrivateHook, user.username, setUsers)
                     }
                   >
                     <MdPersonRemoveAlt1 />
@@ -289,12 +146,7 @@ const SearchFriendsInGame = () => {
                     <div
                       className="remove-block"
                       onClick={() =>
-                        removeBlockToUser(
-                          axiosPrivateHook,
-                          user.username,
-                          users,
-                          setUsers
-                        )
+                        unblockUser(axiosPrivateHook, user.username, setUsers)
                       }
                     >
                       <CgUnblock />
@@ -303,12 +155,7 @@ const SearchFriendsInGame = () => {
                     <div
                       className="block-button"
                       onClick={() =>
-                        blockUser(
-                          axiosPrivateHook,
-                          user.username,
-                          users,
-                          setUsers
-                        )
+                        blockUser(axiosPrivateHook, user.username, setUsers)
                       }
                     >
                       <BiBlock />
