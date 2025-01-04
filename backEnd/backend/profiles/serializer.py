@@ -115,11 +115,17 @@ class SocialAuthontication(serializers.Serializer):
         raise serializers.ValidationError('Failed to login with given credentials')
 
 class FriendRequestSerializer(serializers.ModelSerializer):
-    from_user =  serializers.CharField(source='from_user.username', read_only=True)
-    to_user =  serializers.CharField(source='to_user.username', read_only=True)
+    from_user =  UserSerializer()
     class Meta:
         model = FriendRequest
-        fields = '__all__'
+        fields = ['from_user', 'status', 'created_at']
+
+class SentFriendRequestSerializer(serializers.ModelSerializer):
+    to_user =  UserSerializer()
+    class Meta:
+        model = FriendRequest
+        fields = ['to_user', 'status', 'created_at']
+
 
 class Machserializer(serializers.ModelSerializer):
     userone =  serializers.CharField(source='userone.username', read_only=True)

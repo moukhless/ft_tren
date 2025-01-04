@@ -7,9 +7,7 @@ User = get_user_model()
 @database_sync_to_async
 def get_user(token):
     try:
-        print(token)
         user_id = AccessToken(token).payload['user_id']
-        print(user_id, User.objects.get(id=user_id))
         return User.objects.get(id=user_id)
     except User.DoesNotExist:
         return None
@@ -20,26 +18,12 @@ class TokenAuthMiddleware:
     
     async def __call__(self, scope, receive, send):
         try:
-            # print(scope)
-            print("--------")
-            cookie_header = None
-            for header in scope.get('headers', []):
-                if header[0] == b'cookie':
-                    cookie_header = header[1].decode()
-                    break
-            print(cookie_header)
-            token = ""
-            array = cookie_header.split(';')
-            for i in array:
-                if i.startswith(' accessToken'):
-                    token = i.split('=')[1]
-                    break
-            # print(token)
+            query_string = scope["query_string"]
+            token = query_string.decode().split("=")[1]
             user = await get_user(token)
             if user is not None:
                 scope['user'] = user
-        except Exception as e:
-            print("Error", e)
+        except:
             await send({
                 "type": "websocket.close",
             })
