@@ -28,6 +28,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             'rotationSpeed': 3,
             'moveSpeed': 5,
             'player1': {
+                'username': None,
                 'x': 50,
                 'y': 210,  # (500/2) - (40/2)
                 'angle': 0,
@@ -41,6 +42,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             },
             'player2': {
+                'username': None,
                 'x': 730,  # 800 - 70
                 'y': 210,  # (500/2) - (40/2)
                 'angle': 180,
@@ -314,7 +316,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['game_id']
-        # self.game_id = "93"
         self.user = self.scope['user']
         self.game_group_name = f'game_{self.game_id}'
 
@@ -346,24 +347,23 @@ class GameConsumer(AsyncWebsocketConsumer):
         if not game_state['player1']['connected']:
             self.player_number = 1
             game_state['player1']['connected'] = True
+            game_state['player1']['username'] = self.user.username
             self.game.player1 = self.user
             print('Player 1 connected')
             await self.send(text_data=json.dumps({
                 'type': 'player_number',
                 'number': 1,
-                'game_state': game_state
             }))
 
         elif not game_state['player2']['connected'] and self.user != player1:
             self.player_number = 2
             game_state['player2']['connected'] = True
-            game_state['status'] = 'playing'
+            game_state['player2']['username'] = self.user.username
             self.game.player2 = self.user
             print('Player 2 connected')
             await self.send(text_data=json.dumps({
                 'type': 'player_number',
                 'number': 2,
-                'game_state': game_state
             }))
 
         # If both players are connected, start the game
