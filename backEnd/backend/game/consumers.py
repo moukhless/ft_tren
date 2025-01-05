@@ -16,7 +16,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.game_group_name = None
-        self.room_name = None
+        self.game_id = None
         self.player_number = None
         
     def create_initial_game_state(self):
@@ -313,10 +313,10 @@ class GameConsumer(AsyncWebsocketConsumer):
             pass
 
     async def connect(self):
-        # self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_name = "93"
+        self.game_id = self.scope['url_route']['kwargs']['game_id']
+        # self.game_id = "93"
         self.user = self.scope['user']
-        self.game_group_name = f'game_{self.room_name}'
+        self.game_group_name = f'game_{self.game_id}'
 
         # Get or create game state
         if self.game_group_name not in GameConsumer.game_state:

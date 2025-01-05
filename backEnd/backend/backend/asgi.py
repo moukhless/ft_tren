@@ -14,6 +14,7 @@ from chat import routing, middleware
 from channels.security.websocket import AllowedHostsOriginValidator
 from notification import routing as notification_routing
 from game import routing as game_routing
+from matchmaking import routing as matchmaking_routing
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
@@ -24,6 +25,7 @@ application = ProtocolTypeRouter({
                 routing.websocket_urlpatterns
                 + notification_routing.websocket_urlpatterns
                 + game_routing.websocket_urlpatterns
+                + matchmaking_routing.websocket_urlpatterns
         )
     )
     ),
